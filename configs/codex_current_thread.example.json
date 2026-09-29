@@ -1,0 +1,19 @@
+{
+  "display_name": "Codex Current Thread",
+  "command": [
+    "python",
+    "examples/codex_cli_adapter.py",
+    "--mode",
+    "resume",
+    "--session-id",
+    "REPLACE_WITH_CODEX_SESSION_OR_THREAD_ID"
+  ],
+  "working_dir": ".",
+  "timeout_seconds": 600,
+  "route_by_default": true,
+  "capabilities": [
+    "local.agent",
+    "codex.resume",
+    "codex.current-thread"
+  ]
+}

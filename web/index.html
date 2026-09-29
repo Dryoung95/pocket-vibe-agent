@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pocket Vibe Linux Hub</title>
+    <link rel="stylesheet" href="styles.css?v=7" />
+  </head>
+  <body>
+    <div class="crt"></div>
+    <main class="shell">
+      <section class="hero panel">
+        <div>
+          <p class="eyebrow">RK3588 / LINUX HUB // REMOTE AGENT CONSOLE</p>
+          <h1>POCKET VIBE<br />CONTROL DECK</h1>
+          <p class="subtitle">在开发板上输入提示词，转发给已连接的 Windows / macOS 本地 Agent。</p>
+        </div>
+        <div class="pixel-device" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="status-card">
+          <span id="hubLed" class="led off"></span>
+          <div>
+            <strong id="hubState">DISCONNECTED</strong>
+            <small id="hubMeta">等待 Linux Hub</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid linux-console-grid">
+        <aside class="panel">
+          <div class="panel-title">已连接 Agent</div>
+          <div id="agentList" class="agent-list empty">还没有桌面 Bridge 连入。</div>
+          <button id="refreshBtn" class="pixel-btn secondary">刷新状态</button>
+        </aside>
+
+        <section class="panel command-panel">
+          <div class="panel-title">发送提示词</div>
+          <label class="label" for="objective">提示词 / 任务目标</label>
+          <textarea id="objective" spellcheck="false">请检查本地 Agent 的运行状态，并返回简短结果。</textarea>
+
+          <div class="control-grid">
+            <div class="row">
+              <label class="label" for="provider">Agent 类型</label>
+              <select id="provider">
+                <option value="">自动选择</option>
+                <option value="codex">Codex</option>
+                <option value="claude">Claude Code</option>
+                <option value="local">Local</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label class="label" for="mode">会话模式</label>
+              <select id="mode">
+                <option value="">默认</option>
+                <option value="exec">新任务</option>
+                <option value="resume">恢复指定会话</option>
+                <option value="continue">继续最近会话（Claude）</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label class="label" for="routerLevel">路由复杂度</label>
+              <select id="routerLevel">
+                <option value="auto">自动</option>
+                <option value="fast">快速</option>
+                <option value="balanced">均衡</option>
+                <option value="deep">深入</option>
+                <option value="ultra">超深</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label class="label" for="agentEffort">Agent 推理强度</label>
+              <select id="agentEffort">
+                <option value="">使用默认</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+                <option value="xhigh">xhigh</option>
+                <option value="max">max</option>
+                <option value="ultra">ultra（Codex）</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control-grid">
+            <div class="row">
+              <label class="label" for="modelInput">模型</label>
+              <input id="modelInput" class="target-agent-input" list="modelOptions" spellcheck="false" placeholder="留空使用本地默认模型" />
+              <datalist id="modelOptions">
+                <option value="gpt-5.6-sol"></option>
+                <option value="gpt-5.6-terra"></option>
+                <option value="gpt-5.4"></option>
+                <option value="sonnet"></option>
+                <option value="opus"></option>
+              </datalist>
+            </div>
+
+            <div class="row">
+              <label class="label" for="targetAgent">目标 Agent ID</label>
+              <input id="targetAgent" class="target-agent-input" spellcheck="false" placeholder="自动选择，或点击左侧 Agent" />
+            </div>
+          </div>
+
+          <div class="control-grid">
+            <div class="row">
+              <label class="label" for="sessionId">会话 ID</label>
+              <input id="sessionId" class="target-agent-input" spellcheck="false" placeholder="可选：Codex/Claude 会话 ID" />
+            </div>
+
+            <div class="row">
+              <label class="label" for="cwdInput">工作目录</label>
+              <input id="cwdInput" class="target-agent-input" spellcheck="false" placeholder="可选：例如 S:\\portable-vibe-agent-demo" />
+            </div>
+          </div>
+
+          <button id="sendBtn" class="pixel-btn">发送到本地 Agent</button>
+          <div class="cli-mirror">
+            <div class="cli-title">等价调用</div>
+            <code id="cliMirror">pva turn send --level auto --prompt "..."</code>
+          </div>
+          <div class="hint">安全边界：Linux Hub 只发送结构化任务；真正执行权限由本地 Bridge 的配置决定。</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">Hub 状态</div>
+          <div class="metric">
+            <span>ROUTER MODEL</span>
+            <strong id="qwenModel">Qwen/Qwen3-4B-Instruct-2507</strong>
+          </div>
+          <div class="metric">
+            <span>ROUTER MODE</span>
+            <strong id="qwenMode">heuristic-fallback</strong>
+          </div>
+          <div class="metric">
+            <span>ACTIVE TASK</span>
+            <strong id="activeTask">无</strong>
+          </div>
+          <div class="meter">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="panel-title">最近结果</div>
+        <pre id="latestResult" class="result-box">等待任务结果...</pre>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">事件日志</div>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+    <script src="app.js?v=7"></script>
+  </body>
+</html>

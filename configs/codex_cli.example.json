@@ -1,0 +1,26 @@
+{
+  "display_name": "Codex Worker",
+  "command": [
+    "python",
+    "examples/codex_cli_adapter.py",
+    "--mode",
+    "exec",
+    "--cwd",
+    "S:/portable-vibe-agent-demo",
+    "--sandbox",
+    "read-only",
+    "--approval",
+    "never"
+  ],
+  "working_dir": ".",
+  "timeout_seconds": 600,
+  "route_by_default": true,
+  "capabilities": [
+    "local.agent",
+    "codex.exec",
+    "repo.read",
+    "repo.write",
+    "test.run",
+    "git.status"
+  ]
+}

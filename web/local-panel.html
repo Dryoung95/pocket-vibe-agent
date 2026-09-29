@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pocket Vibe Local Control Panel</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="crt"></div>
+    <main class="shell">
+      <section class="hero panel">
+        <div>
+          <p class="eyebrow">LOCAL COMPUTER // CODEX + CLAUDE IMPORTER</p>
+          <h1>LOCAL AGENT<br />CONTROL PANEL</h1>
+        </div>
+        <div class="pixel-device" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="status-card">
+          <span id="localLed" class="led"></span>
+          <div>
+            <strong id="localState">LOCAL READY</strong>
+            <small id="localMeta">scanning current computer</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid local-grid">
+        <section class="panel">
+          <div class="panel-title">LINUX 配对</div>
+          <label class="label" for="linuxUrl">Linux Hub URL</label>
+          <input id="linuxUrl" class="target-agent-input" spellcheck="false" placeholder="http://192.168.1.20:8787" />
+
+          <div class="row">
+            <label class="label" for="desktopToken">Desktop Token</label>
+            <input id="desktopToken" class="target-agent-input" spellcheck="false" placeholder="Linux 上的 POCKET_VIBE_TOKEN" />
+          </div>
+
+          <div class="row">
+            <label class="label" for="toolToken">Tool Token</label>
+            <input id="toolToken" class="target-agent-input" spellcheck="false" placeholder="Linux 上的 POCKET_VIBE_TOOL_TOKEN，可选" />
+          </div>
+
+          <div class="button-row">
+            <button id="pairBtn" class="pixel-btn">保存 / 测试配对</button>
+            <button id="pairStatusBtn" class="pixel-btn secondary">查看状态</button>
+          </div>
+          <div id="pairingStatus" class="hint">尚未保存 Linux 配对信息。</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">本机运行中</div>
+          <div id="processList" class="agent-list empty">正在扫描本机 Codex / Claude Code 进程...</div>
+          <button id="scanBtn" class="pixel-btn secondary">重新扫描</button>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">可导入模板</div>
+          <div id="templateList" class="agent-list empty">正在读取 bridge 模板...</div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">待导入到 Linux</div>
+        <div id="selectedSummary" class="selection-summary">请选择上面的 Codex / Claude 项。</div>
+        <div class="button-row import-actions">
+          <button id="bundleBtn" class="pixel-btn">生成待配对导入包</button>
+          <button id="launchBtn" class="pixel-btn secondary">生成并启动 Bridge</button>
+        </div>
+        <div class="cli-mirror">
+          <div class="cli-title">IMPORT OUTPUT</div>
+          <code id="importOutput">导入包会写入 runtime/linux_import_bundle.json。</code>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">LOCAL LOG</div>
+        <div id="localLog" class="log"></div>
+      </section>
+    </main>
+    <script src="local-panel.js"></script>
+  </body>
+</html>

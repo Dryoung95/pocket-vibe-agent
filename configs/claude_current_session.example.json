@@ -1,0 +1,23 @@
+{
+  "display_name": "Claude Current Session",
+  "command": [
+    "python",
+    "examples/claude_code_adapter.py",
+    "--mode",
+    "resume",
+    "--session-id",
+    "REPLACE_WITH_CLAUDE_SESSION_ID",
+    "--output-format",
+    "json",
+    "--permission-mode",
+    "default"
+  ],
+  "working_dir": ".",
+  "timeout_seconds": 600,
+  "route_by_default": true,
+  "capabilities": [
+    "local.agent",
+    "claude.resume",
+    "claude.current-session"
+  ]
+}

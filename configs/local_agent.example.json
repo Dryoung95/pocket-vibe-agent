@@ -1,0 +1,18 @@
+{
+  "display_name": "Byte Clerk",
+  "command": [
+    "python",
+    "examples/local_agent_echo.py"
+  ],
+  "working_dir": ".",
+  "timeout_seconds": 120,
+  "route_by_default": true,
+  "capabilities": [
+    "local.agent",
+    "repo.read",
+    "repo.write",
+    "test.run",
+    "git.status"
+  ]
+}
+

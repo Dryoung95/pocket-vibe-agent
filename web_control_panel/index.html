@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f7f9fc" />
+  <meta name="description" content="Pocket Vibe Agent Gateway 网站控制台：扫描本机 Codex / Claude Code，并导入到 Linux Hub。" />
+  <title>Pocket Vibe Agent Gateway</title>
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css?v=7" />
+</head>
+<body>
+  <div class="site-bg" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="Pocket Vibe Home">
+      <span class="brand-mark">PV</span>
+      <span>
+        <strong>Pocket Vibe</strong>
+        <small>Agent Gateway</small>
+      </span>
+    </a>
+    <nav class="nav">
+      <a href="#pairing">配对</a>
+      <a href="#agents">本机 Agent</a>
+      <a href="#import">导入</a>
+      <a href="#bridges">Bridge</a>
+    </nav>
+    <button id="installBtn" class="ghost hidden">安装为应用</button>
+  </header>
+
+  <main id="home" class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">本机网站控制台</p>
+        <h1>把当前电脑上的 Codex / Claude Code 变成 Linux 小电脑可调用的远程 Agent。</h1>
+        <p class="lead">
+          这个网站运行在本机浏览器中，负责扫描本机 Agent、配置待配对 Linux Hub，并一键启动 Desktop Bridge。
+          默认真实执行；需要只验证链路时，可手动开启 dry-run。
+        </p>
+        <div class="hero-actions">
+          <button id="refreshBtn" class="primary">重新扫描本机</button>
+          <button id="copySiteBtn" class="secondary">复制本站地址</button>
+        </div>
+      </div>
+      <aside class="status-panel" aria-label="网站状态">
+        <div class="status-item">
+          <span>网站</span>
+          <strong id="siteOrigin">读取中...</strong>
+        </div>
+        <div class="status-item">
+          <span>本机</span>
+          <strong id="hostName">扫描中...</strong>
+        </div>
+        <div class="status-item">
+          <span>扫描时间</span>
+          <strong id="scanTime">等待扫描</strong>
+        </div>
+      </aside>
+    </section>
+
+    <section id="pairing" class="section-grid">
+      <article class="card span-7">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>连接待配对 Linux Hub</h2>
+          </div>
+          <span id="pairStatus" class="badge warn">待配对</span>
+        </div>
+
+        <div class="form-grid two">
+          <label>
+            Linux Hub 地址
+            <input id="hubInput" placeholder="http://192.168.1.20:8787" autocomplete="off" />
+          </label>
+          <label>
+            Panel Key（如果控制台启用了 POCKET_VIBE_PANEL_KEY）
+            <input id="panelKeyInput" placeholder="本网站后端访问密钥，可留空" type="password" autocomplete="off" />
+          </label>
+          <label>
+            Desktop Bridge Token
+            <input id="desktopTokenInput" placeholder="Linux 端 POCKET_VIBE_TOKEN" type="password" autocomplete="off" />
+          </label>
+          <label>
+            Tool Token（可选，用于检测 Hub /v1/agents）
+            <input id="toolTokenInput" placeholder="Linux 端 POCKET_VIBE_TOOL_TOKEN" type="password" autocomplete="off" />
+          </label>
+        </div>
+
+        <label>
+          开发板配对码
+          <textarea id="pairingCodeInput" placeholder="把队友运行 scripts/start-rk3588-pairing.sh 后显示的 PVA_PAIRING_CODE 粘贴到这里"></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="applyPairingCodeBtn" class="primary">应用配对码</button>
+          <button id="checkHubBtn" class="secondary">检测 Hub</button>
+          <button id="copyPairingBtn" class="secondary">复制配对包</button>
+          <button id="copyLinuxCommandBtn" class="secondary">复制 Linux 启动命令</button>
+        </div>
+        <pre id="hubCheck" class="log small" aria-live="polite"></pre>
+      </article>
+
+      <article class="card span-5">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">安全默认</p>
+            <h2>网站化边界</h2>
+          </div>
+        </div>
+        <ul class="check-list">
+          <li>控制台默认只监听 <code>127.0.0.1:8790</code>。</li>
+          <li>接入非本机 Linux Hub 时拒绝使用默认 <code>dev-token</code>。</li>
+          <li>新导入 Bridge 默认真实执行；仅验证链路时请手动开启 dry-run。</li>
+          <li>跨不可信网络请使用 WireGuard、Tailscale 或 SSH tunnel。</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="agents" class="section-grid">
+      <article class="card span-5">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>本机 Agent 能力</h2>
+          </div>
+        </div>
+        <div id="toolStatus" class="tool-grid"></div>
+      </article>
+
+      <article class="card span-7">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Process</p>
+            <h2>正在运行的相关进程</h2>
+          </div>
+          <span class="badge">本机扫描</span>
+        </div>
+        <div id="processList" class="list"></div>
+      </article>
+    </section>
+
+    <section class="section-grid">
+      <article class="card span-12">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Session</p>
+            <h2>可恢复会话</h2>
+          </div>
+          <span class="badge">点击可自动填入</span>
+        </div>
+        <div class="session-tools">
+          <label class="session-search">
+            搜索会话
+            <input id="sessionSearchInput" placeholder="输入任务名、第一句话、工作目录或 session 短 ID" autocomplete="off" />
+          </label>
+          <span id="sessionCount" class="muted">等待扫描</span>
+        </div>
+        <div id="sessionList" class="session-grid"></div>
+      </article>
+    </section>
+
+    <section id="import" class="card">
+      <div class="card-head">
+        <div>
+          <p class="eyebrow">Step 3</p>
+          <h2>导入到 Linux Hub</h2>
+        </div>
+        <span class="badge ok">启动 Desktop Bridge</span>
+      </div>
+
+      <div id="importDropZone" class="drop-zone" aria-live="polite">
+        <strong>拖入会话即可导入</strong>
+        <span>从上方 Codex / Claude Code 会话卡片拖到这里；已填写 Hub 和 Token 时会自动启动 Bridge。</span>
+      </div>
+
+      <div class="form-grid three">
+        <label>
+          Provider
+          <select id="providerInput">
+            <option value="codex">Codex</option>
+            <option value="claude">Claude Code</option>
+          </select>
+        </label>
+        <label>
+          模式
+          <select id="modeInput">
+            <option value="exec">新任务 / 新会话</option>
+            <option value="resume">恢复指定 session</option>
+            <option value="continue">Claude continue 最近会话</option>
+          </select>
+        </label>
+        <label>
+          Agent ID
+          <input id="agentIdInput" placeholder="留空自动生成，如 claude-worker" autocomplete="off" />
+        </label>
+        <label>
+          Session ID
+          <input id="sessionIdInput" placeholder="选择会话后自动填入；可留空" autocomplete="off" />
+        </label>
+        <label>
+          工作目录
+          <input id="cwdInput" placeholder="例如 S:/your-project；留空使用 demo 根目录" autocomplete="off" />
+        </label>
+        <label>
+          权限策略
+          <input id="permissionInput" placeholder="Claude: permission-mode；Codex: approval" autocomplete="off" />
+        </label>
+      </div>
+
+      <label class="checkbox">
+        <input id="dryRunInput" type="checkbox" />
+        <span>开启 dry-run：只验证导入链路，不真实驱动 Codex / Claude Code。</span>
+      </label>
+
+      <div class="actions">
+        <button id="startBridgeBtn" class="primary">导入 / 启动 Bridge</button>
+        <button id="clearFormBtn" class="secondary">清空选择</button>
+      </div>
+      <pre id="startResult" class="log small" aria-live="polite"></pre>
+    </section>
+
+    <section id="bridges" class="card">
+      <div class="card-head">
+        <div>
+          <p class="eyebrow">Runtime</p>
+          <h2>已导入的 Bridge</h2>
+        </div>
+        <button id="refreshBridgeBtn" class="secondary">刷新 Bridge</button>
+      </div>
+      <div id="bridgeList" class="list"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=7"></script>
+</body>
+</html>
